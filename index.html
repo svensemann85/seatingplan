@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="en">
+<html lang="de">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Seating Plan</title>
+<title>Sitzplan</title>
 <style>
   :root {
     --bg: #f3f4f6; --panel: #fff; --line: #d8dce2; --ink: #1f2328; --muted: #6a737d;
@@ -123,7 +123,7 @@
 
   /* ---------- sidebar ---------- */
   aside {
-    width: 290px; flex-shrink: 0; background: var(--panel); border-left: 1px solid var(--line);
+    width: 310px; flex-shrink: 0; background: var(--panel); border-left: 1px solid var(--line);
     display: flex; flex-direction: column; min-height: 0; overflow: auto;
   }
   aside section { padding: 14px 16px; border-bottom: 1px solid var(--line); }
@@ -133,9 +133,9 @@
     border: 1px solid var(--line); border-radius: 6px;
   }
   .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 6px; }
-  #studentPanel { flex: 1; min-height: 160px; display: flex; flex-direction: column; }
+  #studentPanel { flex: 1 0 auto; min-height: 160px; display: flex; flex-direction: column; }
   #studentPanel.drop-target { background: var(--accent-soft); }
-  #studentList { flex: 1; overflow: auto; margin: 0 -6px; }
+  #studentList { flex: 1; min-height: 140px; overflow: auto; margin: 0 -6px; }
   .stu {
     display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 5px;
     cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
@@ -190,42 +190,42 @@
 <body>
 
 <header>
-  <input id="title" placeholder="Classroom name, e.g. 7b – Maths" aria-label="Classroom name">
+  <input id="title" placeholder="Name der Klasse, z. B. 7b – Mathe" aria-label="Name der Klasse">
   <div class="sep"></div>
-  <button id="addTable2" title="Add a table with 2 seats">+ Table (2 seats)</button>
-  <button id="addTable1" title="Add a table with 1 seat">+ Table (1 seat)</button>
-  <button id="addDesk" title="Add the teacher's desk">+ Teacher's desk</button>
+  <button id="addTable2" title="Tisch mit 2 Plätzen hinzufügen">+ Tisch (2 Plätze)</button>
+  <button id="addTable1" title="Tisch mit 1 Platz hinzufügen">+ Tisch (1 Platz)</button>
+  <button id="addDesk" title="Lehrerpult hinzufügen">+ Lehrerpult</button>
   <div class="sep"></div>
-  <div class="seg" role="group" aria-label="Mode">
-    <button id="modeLayout">Edit tables</button>
-    <button id="modeSeating">Move students</button>
+  <div class="seg" role="group" aria-label="Modus">
+    <button id="modeLayout">Tische bearbeiten</button>
+    <button id="modeSeating">Schüler verschieben</button>
   </div>
   <div class="sep"></div>
-  <button id="randomize" class="primary" title="Place all students randomly">🎲 Seat randomly</button>
-  <button id="clearSeats" title="Remove all students from their seats">Clear seats</button>
+  <button id="randomize" class="primary" title="Alle Schüler zufällig auf die Plätze verteilen">🎲 Zufällig verteilen</button>
+  <button id="clearSeats" title="Alle Schüler von ihren Plätzen entfernen">Plätze leeren</button>
   <div class="spacer"></div>
-  <button id="undo" title="Undo (Ctrl/Cmd+Z)">↶ Undo</button>
-  <button id="redo" title="Redo (Ctrl/Cmd+Shift+Z)">↷ Redo</button>
-  <button id="print" title="Print the seating plan">🖨 Print</button>
+  <button id="undo" title="Rückgängig (Strg/Cmd+Z)">↶ Rückgängig</button>
+  <button id="redo" title="Wiederherstellen (Strg/Cmd+Umschalt+Z)">↷ Wiederherstellen</button>
+  <button id="print" title="Sitzplan drucken">🖨 Drucken</button>
 </header>
 
 <div class="layout">
   <main>
     <div class="tools">
-      <span class="label">Selected table:</span>
-      <button id="rotL" title="Rotate left 15° (Shift+R)">↺ 15°</button>
-      <button id="rotR" title="Rotate right 15° (R)">↻ 15°</button>
-      <button id="rot90" title="Rotate 90°">↻ 90°</button>
-      <button id="toggleSeats" title="Switch between 1 and 2 seats">1 ⇄ 2 seats</button>
-      <button id="duplicate" title="Duplicate (Ctrl/Cmd+D)">Duplicate</button>
-      <button id="deleteTable" class="danger" title="Delete (Del)">Delete</button>
+      <span class="label">Ausgewählter Tisch:</span>
+      <button id="rotL" title="15° nach links drehen (Umschalt+R)">↺ 15°</button>
+      <button id="rotR" title="15° nach rechts drehen (R)">↻ 15°</button>
+      <button id="rot90" title="90° drehen">↻ 90°</button>
+      <button id="toggleSeats" title="Zwischen 1 und 2 Plätzen wechseln">1 ⇄ 2 Plätze</button>
+      <button id="duplicate" title="Duplizieren (Strg/Cmd+D)">Duplizieren</button>
+      <button id="deleteTable" class="danger" title="Löschen (Entf)">Löschen</button>
       <span class="hint" id="hint"></span>
     </div>
     <div class="print-area">
       <div class="print-head"><h1 id="printTitle"></h1><span id="printDate"></span></div>
       <div class="room" id="room">
-        <div class="board">Board</div>
-        <div class="empty-room" id="emptyRoom">Add tables with the buttons above,<br>or create a whole layout with “Quick layout” on the right.</div>
+        <div class="board">Tafel</div>
+        <div class="empty-room" id="emptyRoom">Füge Tische mit den Schaltflächen oben hinzu<br>oder erstelle mit „Schnell-Anordnung“ rechts ein komplettes Raster.</div>
       </div>
       <div class="print-unseated" id="printUnseated"></div>
     </div>
@@ -233,48 +233,48 @@
 
   <aside>
     <section>
-      <h3>Classroom</h3>
-      <select id="classSelect" aria-label="Select classroom" style="width:100%"></select>
+      <h3>Klasse</h3>
+      <select id="classSelect" aria-label="Klasse auswählen" style="width:100%"></select>
       <div class="row">
-        <button id="newClass" title="Create an empty classroom">+ New</button>
-        <button id="dupClass" title="Copy this classroom (tables and students)">Duplicate</button>
-        <button id="delClass" class="danger" title="Delete this classroom">Delete</button>
+        <button id="newClass" title="Neue, leere Klasse anlegen">+ Neu</button>
+        <button id="dupClass" title="Diese Klasse kopieren (Tische und Schüler)">Duplizieren</button>
+        <button id="delClass" class="danger" title="Diese Klasse löschen">Löschen</button>
       </div>
     </section>
     <section>
-      <h3>Add students</h3>
-      <textarea id="newStudents" placeholder="One name per line (you can paste a whole list)"></textarea>
-      <div class="row"><button id="addStudents">Add</button><span class="small">Ctrl/Cmd+Enter</span></div>
+      <h3>Schüler hinzufügen</h3>
+      <textarea id="newStudents" placeholder="Ein Name pro Zeile (ganze Liste einfügen möglich)"></textarea>
+      <div class="row"><button id="addStudents">Hinzufügen</button><span class="small">Strg/Cmd+Enter</span></div>
     </section>
     <section id="studentPanel">
-      <h3>Students (<span id="count">0</span>)</h3>
+      <h3>Schüler (<span id="count">0</span>)</h3>
       <div id="studentList"></div>
-      <p class="small">Drag a name onto a seat. Drop a seated student here to unseat. Double-click to rename.</p>
+      <p class="small">Namen auf einen Platz ziehen. Sitzende Schüler hierher ziehen, um den Platz freizugeben. Doppelklick zum Umbenennen.</p>
     </section>
     <section>
       <div id="stats"></div>
-      <label class="check"><input type="checkbox" id="fillTables"> Fill tables completely when seating randomly (nobody sits alone unless necessary)</label>
+      <label class="check"><input type="checkbox" id="fillTables"> Beim zufälligen Verteilen Tische voll besetzen (niemand sitzt allein, außer es geht nicht anders)</label>
     </section>
     <section>
-      <h3>Quick layout</h3>
+      <h3>Schnell-Anordnung</h3>
       <div class="row">
-        <input type="number" id="qRows" min="1" max="10" value="4"> rows ×
-        <input type="number" id="qCols" min="1" max="8" value="3"> cols
+        <input type="number" id="qRows" min="1" max="10" value="4"> Reihen ×
+        <input type="number" id="qCols" min="1" max="8" value="3"> Spalten
       </div>
       <div class="row">
-        <select id="qSeats"><option value="2">2 seats</option><option value="1">1 seat</option></select>
-        <button id="generate">Create</button>
+        <select id="qSeats"><option value="2">2 Plätze</option><option value="1">1 Platz</option></select>
+        <button id="generate">Erstellen</button>
       </div>
-      <p class="small">Replaces all student tables (the teacher's desk is kept).</p>
+      <p class="small">Ersetzt alle Schülertische (das Lehrerpult bleibt erhalten).</p>
     </section>
     <section>
-      <h3>Backup (all classrooms)</h3>
+      <h3>Sicherung (alle Klassen)</h3>
       <div class="row">
-        <button id="export" title="Save all classrooms to a file">Export</button>
-        <button id="import" title="Load classrooms from a file">Import</button>
-        <button id="reset" class="danger" title="Delete all classrooms">Reset all</button>
+        <button id="export" title="Alle Klassen in eine Datei speichern">Exportieren</button>
+        <button id="import" title="Klassen aus einer Datei laden">Importieren</button>
+        <button id="reset" class="danger" title="Alle Klassen löschen">Alles löschen</button>
       </div>
-      <p class="small">Everything is saved automatically in this browser. Export regularly as a backup or to move your classrooms to another computer.</p>
+      <p class="small">Alles wird automatisch in diesem Browser gespeichert. Exportiere regelmäßig als Sicherung oder um die Klassen auf einen anderen Computer zu übertragen.</p>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
     </section>
   </aside>
@@ -329,7 +329,7 @@
     project.currentId = state.id;
     try { localStorage.setItem(KEY, JSON.stringify(project)); } catch (e) {}
   }
-  const className = c => c.title.trim() || 'Untitled classroom';
+  const className = c => c.title.trim() || 'Unbenannte Klasse';
 
   function snapshot() {
     undoStack.push(JSON.stringify(state));
@@ -397,7 +397,7 @@
       el.dataset.id = t.id;
       if (t.kind === 'desk') {
         const l = document.createElement('span');
-        l.className = 'desk-label'; l.textContent = "Teacher";
+        l.className = 'desk-label'; l.textContent = "Lehrerpult";
         el.append(l);
       } else {
         t.seats.forEach((sid, i) => {
@@ -411,7 +411,7 @@
       }
       if (t.id === selectedId && mode === 'layout') {
         const h = document.createElement('div');
-        h.className = 'rot-handle'; h.title = 'Drag to rotate (hold Shift for free angle)';
+        h.className = 'rot-handle'; h.title = 'Ziehen zum Drehen (Umschalt gedrückt halten für freien Winkel)';
         el.append(h);
       }
       placeEl(el, t);
@@ -423,24 +423,24 @@
     $('#count').textContent = state.students.length;
     const seated = new Set(state.tables.flatMap(t => t.seats).filter(Boolean));
     list.innerHTML = '';
-    if (!state.students.length) list.innerHTML = '<p class="empty">No students yet.</p>';
+    if (!state.students.length) list.innerHTML = '<p class="empty">Noch keine Schüler.</p>';
     for (const s of state.students) {
       const row = document.createElement('div');
       row.className = 'stu' + (seated.has(s.id) ? ' seated' : '');
       row.dataset.id = s.id;
-      row.title = seated.has(s.id) ? 'Seated' : 'Not seated';
-      row.innerHTML = '<span class="dot"></span><span class="sname"></span><button class="del" title="Remove student">×</button>';
+      row.title = seated.has(s.id) ? 'Sitzt' : 'Ohne Platz';
+      row.innerHTML = '<span class="dot"></span><span class="sname"></span><button class="del" title="Schüler entfernen">×</button>';
       row.querySelector('.sname').textContent = s.name;
       list.append(row);
     }
     const seats = state.tables.reduce((n, t) => n + t.seats.length, 0);
     const unseated = state.students.filter(s => !seated.has(s.id));
     const stats = $('#stats');
-    stats.textContent = `${state.students.length} students · ${seats} seats · ${unseated.length} not seated`;
+    stats.textContent = `${state.students.length} Schüler · ${seats} Plätze · ${unseated.length} ohne Platz`;
     stats.classList.toggle('warn', state.students.length > seats);
-    if (state.students.length > seats) stats.textContent += ` — ${state.students.length - seats} seat(s) missing!`;
+    if (state.students.length > seats) stats.textContent += ` — es fehlen ${state.students.length - seats} Platz/Plätze!`;
     $('#printUnseated').textContent = unseated.length && state.tables.length
-      ? 'Not seated: ' + unseated.map(s => s.name).join(', ') : '';
+      ? 'Ohne Platz: ' + unseated.map(s => s.name).join(', ') : '';
   }
 
   function renderUI() {
@@ -453,11 +453,11 @@
     $('#modeSeating').classList.toggle('on', mode === 'seating');
     $('#fillTables').checked = !!state.fillTables;
     if (document.activeElement !== $('#title')) $('#title').value = state.title || '';
-    $('#printTitle').textContent = state.title || 'Seating plan';
-    $('#printDate').textContent = new Date().toLocaleDateString();
+    $('#printTitle').textContent = state.title || 'Sitzplan';
+    $('#printDate').textContent = new Date().toLocaleDateString('de-DE');
     $('#hint').textContent = mode === 'layout'
-      ? 'Drag tables to move · drag the blue dot to rotate · Alt = no grid snap'
-      : 'Drag a student onto another seat to move or swap';
+      ? 'Tische ziehen zum Verschieben · blauen Punkt ziehen zum Drehen · Alt = ohne Raster'
+      : 'Schüler auf einen anderen Platz ziehen zum Verschieben oder Tauschen';
   }
 
   let toastTimer;
@@ -622,7 +622,7 @@
 
   function generate() {
     const rows = clamp(+$('#qRows').value || 1, 1, 10), cols = clamp(+$('#qCols').value || 1, 1, 8), n = +$('#qSeats').value;
-    if (state.tables.some(t => t.kind !== 'desk') && !confirm('Replace all current tables with the new layout?')) return;
+    if (state.tables.some(t => t.kind !== 'desk') && !confirm('Alle aktuellen Tische durch die neue Anordnung ersetzen?')) return;
     const w = n * SEAT, h = SEAT, top = 140, bottom = 30, side = 30;
     const gapX = cols > 1 ? Math.min(90, (ROOM_W - 2 * side - cols * w) / (cols - 1)) : 0;
     const gapY = rows > 1 ? Math.min(80, (ROOM_H - top - bottom - rows * h) / (rows - 1)) : 0;
@@ -635,7 +635,7 @@
           x: Math.round(x0 + c * (w + gapX)), y: Math.round(y0 + r * (h + gapY)) });
       selectedId = null;
     });
-    if (gapX < 10 || gapY < 25) toast('That many tables don\'t fit well – some may overlap. Try fewer rows or columns.');
+    if (gapX < 10 || gapY < 25) toast('So viele Tische passen nicht gut in den Raum – einige überlappen evtl. Weniger Reihen oder Spalten wählen.');
     setMode('layout');
   }
 
@@ -646,7 +646,7 @@
     if (!names.length) return;
     change(() => names.forEach(name => state.students.push({ id: uid(), name })));
     ta.value = ''; ta.focus();
-    toast(`Added ${names.length} student${names.length > 1 ? 's' : ''}`);
+    toast(`${names.length} Schüler hinzugefügt`);
   }
   function removeStudent(id) {
     change(() => {
@@ -690,8 +690,8 @@
   // ---------- seating ----------
   function randomize() {
     const tables = shuffle(state.tables.filter(t => t.kind !== 'desk'));
-    if (!tables.length) return toast('Add some tables first.');
-    if (!state.students.length) return toast('Add some students first.');
+    if (!tables.length) return toast('Bitte zuerst Tische hinzufügen.');
+    if (!state.students.length) return toast('Bitte zuerst Schüler hinzufügen.');
     let seats = [];
     for (const t of tables) {
       const idx = shuffle(t.seats.map((_, i) => i));
@@ -705,7 +705,7 @@
     });
     setMode('seating');
     const missing = students.length - seats.length;
-    toast(missing > 0 ? `${missing} student(s) could not be seated – not enough seats!` : 'Students seated randomly. Drag to adjust.');
+    toast(missing > 0 ? `${missing} Schüler konnten nicht platziert werden – zu wenige Plätze!` : 'Schüler zufällig verteilt. Zum Anpassen einfach ziehen.');
   }
   function clearSeats() { change(() => state.tables.forEach(t => t.seats.fill(null))); }
 
@@ -723,18 +723,18 @@
     switchClass(c.id);
   }
   function createClass() {
-    addClass(newClass(`Classroom ${project.classes.length + 1}`));
+    addClass(newClass(`Klasse ${project.classes.length + 1}`));
     const t = $('#title'); t.focus(); t.select();
-    toast('New classroom created – type its name at the top left.');
+    toast('Neue Klasse angelegt – Namen oben links eingeben.');
   }
   function duplicateClass() {
     const copy = JSON.parse(JSON.stringify(state));
-    copy.id = uid(); copy.title = className(state) + ' (copy)';
+    copy.id = uid(); copy.title = className(state) + ' (Kopie)';
     addClass(copy);
-    toast('Classroom duplicated.');
+    toast('Klasse dupliziert.');
   }
   function deleteClass() {
-    if (!confirm(`Delete the classroom "${className(state)}" with all its tables and students?\nThis cannot be undone.`)) return;
+    if (!confirm(`Klasse „${className(state)}“ mit allen Tischen und Schülern löschen?\nDas kann nicht rückgängig gemacht werden.`)) return;
     const idx = project.classes.indexOf(state);
     project.classes.splice(idx, 1);
     if (!project.classes.length) project.classes.push(newClass(''));
@@ -749,9 +749,9 @@
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `seatingplan-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `sitzplan-${new Date().toISOString().slice(0, 10)}.json`;
     a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    toast(`Exported ${project.classes.length} classroom(s).`);
+    toast(`${project.classes.length} Klasse(n) exportiert.`);
   }
   $('#importFile').addEventListener('change', async e => {
     const f = e.target.files[0]; e.target.value = '';
@@ -760,17 +760,17 @@
     try { data = JSON.parse(await f.text()); } catch (err) { data = null; }
     if (validProject(data)) {
       const n = data.classes.length;
-      if (!confirm(`Replace all ${project.classes.length} classroom(s) in this browser with the ${n} classroom(s) from the file?`)) return;
+      if (!confirm(`Alle ${project.classes.length} Klasse(n) in diesem Browser durch die ${n} Klasse(n) aus der Datei ersetzen?`)) return;
       project = newProject(fixIds(data.classes));
       if (data.classes.some(c => c.id === data.currentId)) project.currentId = data.currentId;
       state = null;
       switchClass(currentClass().id);
-      toast(`Imported ${n} classroom(s).`);
+      toast(`${n} Klasse(n) importiert.`);
     } else if (validClass(data)) {   // file from the single-classroom version
       addClass({ ...data, id: uid(), title: data.title || f.name.replace(/\.json$/i, '') });
-      toast('Classroom imported and added.');
+      toast('Klasse importiert und hinzugefügt.');
     } else {
-      toast('This file is not a valid seating plan.');
+      toast('Diese Datei ist kein gültiger Sitzplan.');
     }
   });
 
@@ -797,7 +797,7 @@
   on('export', exportJSON);
   on('import', () => $('#importFile').click());
   on('reset', () => {
-    if (!confirm(`Delete ALL ${project.classes.length} classroom(s) with their tables and students?\nTip: export a backup first.`)) return;
+    if (!confirm(`ALLE ${project.classes.length} Klasse(n) mit allen Tischen und Schülern löschen?\nTipp: Vorher eine Sicherung exportieren.`)) return;
     project = newProject(); state = null;
     switchClass(project.currentId);
   });
