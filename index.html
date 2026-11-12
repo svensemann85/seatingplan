@@ -190,7 +190,7 @@
 <body>
 
 <header>
-  <input id="title" placeholder="Class name, e.g. 7b – Maths" aria-label="Plan title">
+  <input id="title" placeholder="Classroom name, e.g. 7b – Maths" aria-label="Classroom name">
   <div class="sep"></div>
   <button id="addTable2" title="Add a table with 2 seats">+ Table (2 seats)</button>
   <button id="addTable1" title="Add a table with 1 seat">+ Table (1 seat)</button>
@@ -233,6 +233,15 @@
 
   <aside>
     <section>
+      <h3>Classroom</h3>
+      <select id="classSelect" aria-label="Select classroom" style="width:100%"></select>
+      <div class="row">
+        <button id="newClass" title="Create an empty classroom">+ New</button>
+        <button id="dupClass" title="Copy this classroom (tables and students)">Duplicate</button>
+        <button id="delClass" class="danger" title="Delete this classroom">Delete</button>
+      </div>
+    </section>
+    <section>
       <h3>Add students</h3>
       <textarea id="newStudents" placeholder="One name per line (you can paste a whole list)"></textarea>
       <div class="row"><button id="addStudents">Add</button><span class="small">Ctrl/Cmd+Enter</span></div>
@@ -259,13 +268,13 @@
       <p class="small">Replaces all student tables (the teacher's desk is kept).</p>
     </section>
     <section>
-      <h3>File</h3>
+      <h3>Backup (all classrooms)</h3>
       <div class="row">
-        <button id="export">Export</button>
-        <button id="import">Import</button>
-        <button id="reset" class="danger">Reset all</button>
+        <button id="export" title="Save all classrooms to a file">Export</button>
+        <button id="import" title="Load classrooms from a file">Import</button>
+        <button id="reset" class="danger" title="Delete all classrooms">Reset all</button>
       </div>
-      <p class="small">Everything is saved automatically in this browser.</p>
+      <p class="small">Everything is saved automatically in this browser. Export regularly as a backup or to move your classrooms to another computer.</p>
       <input type="file" id="importFile" accept=".json,application/json" hidden>
     </section>
   </aside>
@@ -275,27 +284,52 @@
 
 <script>
 (() => {
-  const SEAT = 80, ROOM_W = 1000, ROOM_H = 640, GRID = 10, KEY = 'seatingplan.v1';
+  const SEAT = 80, ROOM_W = 1000, ROOM_H = 640, GRID = 10;
+  const KEY = 'seatingplan.v2', OLD_KEY = 'seatingplan.v1';
   const $ = s => document.querySelector(s);
+  const uid = () => Math.random().toString(36).slice(2, 10);
   const room = $('#room'), list = $('#studentList');
 
-  let state = load();
+  // project = all classrooms; state = the classroom currently being edited
+  let project = loadProject();
+  let state = currentClass();
   let mode = 'layout';
   let selectedId = null;
   const undoStack = [], redoStack = [];
 
   // ---------- state ----------
-  function defaultState() { return { title: '', students: [], tables: [], fillTables: true }; }
-  function load() {
-    try {
-      const s = JSON.parse(localStorage.getItem(KEY));
-      if (valid(s)) return s;
-    } catch (e) {}
-    return defaultState();
+  function newClass(title = '') { return { id: uid(), title, students: [], tables: [], fillTables: true }; }
+  function newProject(classes) {
+    const cls = classes && classes.length ? classes : [newClass('')];
+    return { app: 'seatingplan', version: 2, currentId: cls[0].id, classes: cls };
   }
-  function valid(s) { return s && Array.isArray(s.tables) && Array.isArray(s.students); }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
-  const uid = () => Math.random().toString(36).slice(2, 10);
+  function validClass(s) { return !!s && Array.isArray(s.tables) && Array.isArray(s.students); }
+  function validProject(p) { return !!p && Array.isArray(p.classes) && p.classes.length > 0 && p.classes.every(validClass); }
+  // make sure every classroom has a unique id (e.g. after importing)
+  function fixIds(classes) {
+    const seen = new Set();
+    for (const c of classes) { if (!c.id || seen.has(c.id)) c.id = uid(); seen.add(c.id); }
+    return classes;
+  }
+  function loadProject() {
+    try {
+      const p = JSON.parse(localStorage.getItem(KEY));
+      if (validProject(p)) { fixIds(p.classes); return p; }
+    } catch (e) {}
+    try { // migrate a plan saved by the single-classroom version
+      const old = JSON.parse(localStorage.getItem(OLD_KEY));
+      if (validClass(old)) return newProject([{ ...old, id: uid() }]);
+    } catch (e) {}
+    return newProject();
+  }
+  function currentClass() {
+    return project.classes.find(c => c.id === project.currentId) || project.classes[0];
+  }
+  function save() {
+    project.currentId = state.id;
+    try { localStorage.setItem(KEY, JSON.stringify(project)); } catch (e) {}
+  }
+  const className = c => c.title.trim() || 'Untitled classroom';
 
   function snapshot() {
     undoStack.push(JSON.stringify(state));
@@ -306,7 +340,9 @@
   function restore(from, to) {
     if (!from.length) return;
     to.push(JSON.stringify(state));
+    const idx = project.classes.indexOf(state);
     state = JSON.parse(from.pop());
+    project.classes[idx] = state;
     if (!tableById(selectedId)) selectedId = null;
     save(); render();
   }
@@ -329,7 +365,18 @@
   }
 
   // ---------- rendering ----------
-  function render() { renderRoom(); renderStudents(); renderUI(); }
+  function render() { renderClasses(); renderRoom(); renderStudents(); renderUI(); }
+
+  function renderClasses() {
+    const sel = $('#classSelect');
+    sel.innerHTML = '';
+    for (const c of project.classes) {
+      const o = document.createElement('option');
+      o.value = c.id; o.textContent = className(c);
+      sel.append(o);
+    }
+    sel.value = state.id;
+  }
 
   function placeEl(el, t) {
     const { w, h } = tableSize(t);
@@ -662,23 +709,69 @@
   }
   function clearSeats() { change(() => state.tables.forEach(t => t.seats.fill(null))); }
 
+  // ---------- classrooms ----------
+  function switchClass(id) {
+    const c = project.classes.find(c => c.id === id);
+    if (!c || c === state) return;
+    state = c; selectedId = null; mode = 'layout';
+    undoStack.length = redoStack.length = 0;   // undo history is per classroom visit
+    $('#title').value = state.title || '';
+    save(); render();
+  }
+  function addClass(c) {
+    project.classes.push(c);
+    switchClass(c.id);
+  }
+  function createClass() {
+    addClass(newClass(`Classroom ${project.classes.length + 1}`));
+    const t = $('#title'); t.focus(); t.select();
+    toast('New classroom created – type its name at the top left.');
+  }
+  function duplicateClass() {
+    const copy = JSON.parse(JSON.stringify(state));
+    copy.id = uid(); copy.title = className(state) + ' (copy)';
+    addClass(copy);
+    toast('Classroom duplicated.');
+  }
+  function deleteClass() {
+    if (!confirm(`Delete the classroom "${className(state)}" with all its tables and students?\nThis cannot be undone.`)) return;
+    const idx = project.classes.indexOf(state);
+    project.classes.splice(idx, 1);
+    if (!project.classes.length) project.classes.push(newClass(''));
+    state = null;
+    switchClass(project.classes[Math.max(0, idx - 1)].id);
+  }
+
   // ---------- file ----------
   function exportJSON() {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+    save();
+    const data = { ...project, exportedAt: new Date().toISOString() };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = (state.title || 'seating-plan').replace(/[^\w\-äöüÄÖÜß ]+/g, '_').trim() + '.json';
+    a.download = `seatingplan-${new Date().toISOString().slice(0, 10)}.json`;
     a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    toast(`Exported ${project.classes.length} classroom(s).`);
   }
   $('#importFile').addEventListener('change', async e => {
     const f = e.target.files[0]; e.target.value = '';
     if (!f) return;
-    try {
-      const s = JSON.parse(await f.text());
-      if (!valid(s)) throw new Error();
-      change(() => { state = s; selectedId = null; });
-      toast('Plan imported.');
-    } catch (err) { toast('This file is not a valid seating plan.'); }
+    let data;
+    try { data = JSON.parse(await f.text()); } catch (err) { data = null; }
+    if (validProject(data)) {
+      const n = data.classes.length;
+      if (!confirm(`Replace all ${project.classes.length} classroom(s) in this browser with the ${n} classroom(s) from the file?`)) return;
+      project = newProject(fixIds(data.classes));
+      if (data.classes.some(c => c.id === data.currentId)) project.currentId = data.currentId;
+      state = null;
+      switchClass(currentClass().id);
+      toast(`Imported ${n} classroom(s).`);
+    } else if (validClass(data)) {   // file from the single-classroom version
+      addClass({ ...data, id: uid(), title: data.title || f.name.replace(/\.json$/i, '') });
+      toast('Classroom imported and added.');
+    } else {
+      toast('This file is not a valid seating plan.');
+    }
   });
 
   // ---------- wiring ----------
@@ -704,13 +797,19 @@
   on('export', exportJSON);
   on('import', () => $('#importFile').click());
   on('reset', () => {
-    if (confirm('Delete all tables and students?')) change(() => { state = defaultState(); selectedId = null; });
+    if (!confirm(`Delete ALL ${project.classes.length} classroom(s) with their tables and students?\nTip: export a backup first.`)) return;
+    project = newProject(); state = null;
+    switchClass(project.currentId);
   });
+  on('newClass', createClass);
+  on('dupClass', duplicateClass);
+  on('delClass', deleteClass);
+  $('#classSelect').addEventListener('change', e => switchClass(e.target.value));
   $('#newStudents').addEventListener('keydown', e => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); addStudents(); }
   });
   $('#fillTables').addEventListener('change', e => { state.fillTables = e.target.checked; save(); });
-  $('#title').addEventListener('input', e => { state.title = e.target.value; save(); renderUI(); });
+  $('#title').addEventListener('input', e => { state.title = e.target.value; save(); renderUI(); renderClasses(); });
 
   addEventListener('keydown', e => {
     if (e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
@@ -731,6 +830,7 @@
     }
   });
 
+  save();
   render();
 })();
 </script>
